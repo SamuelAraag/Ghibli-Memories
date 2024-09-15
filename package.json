@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:ci": "ng test --no-watch --no-progress --browsers=ChromeHeadless",
+    "build-ci": "ng build",
     "serve:ssr:ghibli-memories": "node dist/ghibli-memories/server/server.mjs"
   },
   "private": true,
