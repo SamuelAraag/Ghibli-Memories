@@ -29,14 +29,13 @@ jobs:
     
     - name: Run tests
       run: npm run test-ci
-       
-    - name: Build
-      run: npm run build-ci
 
     - run: mkdir temporario
     - run: cd temporario
     - run: git clone https://github.com/SamuelAraag/Ghibli-Memories.git
+    - run: git submodule add https://github.com/SamuelAraag/Ghibli-Memories.git temporario/Ghibli-Memories
     - run: cd Ghibli-Memories
+    - run: git checkout main
     - run: npm run build-ci
     - run: git config --global user.email "samoelgaaradossantos@gmail.com"
     - run: git config --global user.name "SamuelAraag"
