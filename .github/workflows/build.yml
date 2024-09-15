@@ -39,7 +39,7 @@ jobs:
     - run: git config --global user.name "SamuelAraag"
     - run: git add --all
     - run: git commit -m 'deploy'
-    - run: git push origin HEAD:master -f
+    - run: git push origin HEAD:refs/heads/master -f
     - run: cd ..
     - run: rm -rf Ghibli-Memories
     - run: cd cd "$CURR_DIR"
