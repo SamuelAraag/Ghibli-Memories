@@ -44,7 +44,7 @@ jobs:
     - run: git config advice.addEmbeddedRepo false
     - run: git add --all
     - run: git commit -m 'deploy'
-    - run: git push origin HEAD:refs/heads/master -f
+    - run: git push origin HEAD:refs/heads/main -f
     - run: cd ..
     - run: rm -rf Ghibli-Memories
     - run: cd "$CURR_DIR"
