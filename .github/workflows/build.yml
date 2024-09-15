@@ -34,3 +34,6 @@ jobs:
        
     - name: Build
       run: npm run build-ci
+
+    - run: git clone git@github.com:SamuelAraag/Ghibli-Memories.git
+    - run: cd Ghibli-Memories
