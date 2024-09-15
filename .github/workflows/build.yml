@@ -41,6 +41,7 @@ jobs:
     - run: mv /home/runner/work/Ghibli-Memories/Ghibli-Memories/docs/* .
     - run: git config --global user.email "samoelgaaradossantos@gmail.com"
     - run: git config --global user.name "SamuelAraag"
+    - run: git config advice.addEmbeddedRepo false
     - run: git add --all
     - run: git commit -m 'deploy'
     - run: git push origin HEAD:refs/heads/master -f
