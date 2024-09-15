@@ -27,9 +27,11 @@ jobs:
         cache-dependency-path: package-lock.json
     - run: npm ci
 
+    - run: git checkout main
+    - run: git pull
     - run: npm run build-ci
     - run: git config --global user.email "samoelgaaradossantos@gmail.com"
     - run: git config --global user.name "SamuelAraag"
     - run: git add --all
     - run: git commit -m 'deploy'
-    - run: git push
+    - run: git push -f
