@@ -31,14 +31,12 @@ jobs:
       run: npm run test-ci
 
     - run: CURR_DIR=$(basename "$PWD")
-    - run: cd ..
+    - run: cd 
     - run: git clone https://github.com/SamuelAraag/Ghibli-Memories.git
     - run: cd Ghibli-Memories
     - run: rm -rf docs
-    - run: mkdir docs
-    - run: cd docs
     - run: npm run build-ci
-    - run: mv /home/runner/work/Ghibli-Memories/Ghibli-Memories/docs/* .
+    - run: mv /home/runner/work/Ghibli-Memories/Ghibli-Memories/docs/* docs
     - run: git config --global user.email "samoelgaaradossantos@gmail.com"
     - run: git config --global user.name "SamuelAraag"
     - run: git add --all
