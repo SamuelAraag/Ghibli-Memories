@@ -42,4 +42,4 @@ jobs:
     - run: git push origin HEAD:refs/heads/master -f
     - run: cd ..
     - run: rm -rf Ghibli-Memories
-    - run: cd cd "$CURR_DIR"
+    - run: cd "$CURR_DIR"
