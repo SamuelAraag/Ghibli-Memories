@@ -33,7 +33,8 @@ jobs:
     - name: Build
       run: npm run build-ci
 
-    - run: cd ..
+    - run: mkdir temporario
+    - run: cd temporario
     - run: git clone https://github.com/SamuelAraag/Ghibli-Memories.git
     - run: cd Ghibli-Memories
     - run: npm run build-ci
@@ -43,4 +44,5 @@ jobs:
     - run: git commit -m 'deploy'
     - run: git push
     - run: cd ..
-    - run: rm -rf Ghibli-Memories
+    - run: cd ..
+    - run: rm -rf temporario
