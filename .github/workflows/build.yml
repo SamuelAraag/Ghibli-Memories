@@ -37,7 +37,7 @@ jobs:
 
     - run: git clone https://github.com/SamuelAraag/Ghibli-Memories.git
     - run: cd Ghibli-Memories
-    - run: ng build
+    - run: npm run build-ci
     - run: git add --all
     - run: git commit -m 'deploy'
     - run: git push
