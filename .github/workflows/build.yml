@@ -30,11 +30,8 @@ jobs:
     - name: Run tests
       run: npm run test-ci
        
-    - name: Build
-      run: npm run build-ci
-
-    - run: mkdir temporario
-    - run: cd temporario
+    - run: CURR_DIR=$(basename "$PWD")
+    - run: cd ..
     - run: git clone https://github.com/SamuelAraag/Ghibli-Memories.git
     - run: cd Ghibli-Memories
     - run: npm run build-ci
@@ -44,5 +41,6 @@ jobs:
     - run: git commit -m 'deploy'
     - run: git push
     - run: cd ..
-    - run: cd ..
-    - run: rm -rf temporario
+    - run: rm -rf Ghibli-Memories
+    - run: cd "$CURR_DIR"
+
