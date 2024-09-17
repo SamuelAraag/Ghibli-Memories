@@ -24,6 +24,6 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, ghibli-memories');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Teste de debloy com alterações de codigo 2');
   });
 });
