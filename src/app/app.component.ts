@@ -3,7 +3,6 @@ import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { lastValueFrom } from 'rxjs';
 import { Movie } from './models/movie.model';
-import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-root',
