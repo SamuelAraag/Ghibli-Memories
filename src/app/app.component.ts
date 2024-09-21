@@ -17,10 +17,14 @@ export class AppComponent implements OnInit {
   constructor(private http: HttpClient){}
   title = 'ghibli-memories';
 
+  movie?: Movie;
+
   async ngOnInit() {
     const url = "https://ghibliapi.vercel.app/films";
     this.movies = await lastValueFrom(this.http.get<Movie[]>(url));
     console.log(this.movies[0])
+
+    this.movie = this.movies[3];
 
     this.updateProgressBar();
   }

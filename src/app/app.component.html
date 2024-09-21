@@ -230,24 +230,26 @@
       <!-- card filme -->
        <div class="card-video">
         <div class="conteudo-card">
-          <img src="{{movies[0].image}}" alt="poster">
+          <div class="zoom-container ">
+            <img src="{{movie?.image}}" alt="poster">
+          </div>
           <div class="informativo-filme">
             <h4 class="titulo px-1 text-truncate w-100">
-              {{movies[0].title.toUpperCase()}}
+              {{movie?.title?.toUpperCase()}}
             </h4>
             <div class="ano-tempo-genero d-flex">
-              <p class="me-2 mt-0">{{movies[0].release_date}} &bull;</p>
-              <p class="me-2 mt-0">{{movies[0].running_time}}min &bull;</p>
+              <p class="me-2 mt-0">{{movie?.release_date}} &bull;</p>
+              <p class="me-2 mt-0">{{movie?.running_time}}min &bull;</p>
               <p class="me-2 mt-0">Animation</p>
             </div>
             <div class="classificacao circle">
               <div class="progress-container">
-                <div *ngIf="updateProgressBar(movies[0].rt_score)" class="progress-bar" id="progress-bar"></div>
+                <div *ngIf="updateProgressBar(movie?.rt_score)" class="progress-bar" id="progress-bar"></div>
               </div>
             </div>
             <div class="descricao multiline-truncate">
               <p class="">
-                {{movies[0].description}}
+                {{movie?.description}}
               </p>
             </div>
             <div class="botao-interacao"></div>
