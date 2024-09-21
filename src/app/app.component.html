@@ -225,12 +225,38 @@
           <clipPath id="a"><path fill="#fff" d="M0 0h982v239H0z" /></clipPath>
         </defs>
       </svg>
-      <h1>Teste de debloy com alterações de codigo 2</h1>
-      <h2>H2 adicionada</h2>
-      <h3>H3 adicionada</h3>
-      <p>Congratulations! Your app is running. 🎉</p>
+
+
+      <!-- card filme -->
+       <div class="card-video">
+        <div class="conteudo-card">
+          <img src="{{movies[0].image}}" alt="poster">
+          <div class="informativo-filme">
+            <h4 class="titulo px-1 text-truncate w-100">
+              {{movies[0].title.toUpperCase()}}
+            </h4>
+            <div class="ano-tempo-genero d-flex">
+              <p class="me-2 mt-0">{{movies[0].release_date}} &bull;</p>
+              <p class="me-2 mt-0">{{movies[0].running_time}}min &bull;</p>
+              <p class="me-2 mt-0">Animation</p>
+            </div>
+            <div class="classificacao circle">
+              <div class="progress-container">
+                <div *ngIf="updateProgressBar(movies[0].rt_score)" class="progress-bar" id="progress-bar"></div>
+              </div>
+            </div>
+            <div class="descricao multiline-truncate">
+              <p class="">
+                {{movies[0].description}}
+              </p>
+            </div>
+            <div class="botao-interacao"></div>
+          </div>
+        </div>
+       </div>
+
     </div>
-    <div class="divider" role="separator" aria-label="Divider"></div>
+    <!-- <div class="divider" role="separator" aria-label="Divider"></div>
     <div class="right-side">
       <div class="pill-group">
         @for (movie of movies; track movie.title) {
@@ -316,7 +342,7 @@
           </svg>
         </a>
       </div>
-    </div>
+    </div> -->
   </div>
 </main>
 
