@@ -22,14 +22,16 @@ export class AppComponent implements OnInit {
   async ngOnInit() {
     const url = "https://ghibliapi.vercel.app/films";
     this.movies = await lastValueFrom(this.http.get<Movie[]>(url));
-    console.log(this.movies[0])
 
-    this.movie = this.movies[3];
-
-    this.updateProgressBar();
+    this.movie = this.movies[4];
+    console.table(this.movie)
   }
 
   updateProgressBar(nota?: string) {
+    if(!nota) return false;
+
+    console.log(nota)
+
     let notaConvertida = Number(nota) || 0;
     const progressBar = document.getElementById('progress-bar');
     

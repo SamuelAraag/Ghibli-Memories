@@ -234,9 +234,14 @@
             <img src="{{movie?.image}}" alt="poster">
           </div>
           <div class="informativo-filme">
-            <h4 class="titulo px-1 text-truncate w-100">
+            <h4 class="titulo text-truncate w-100">
               {{movie?.title?.toUpperCase()}}
             </h4>
+            <div class="d-flex">
+              <p class="mt-0 mb-2 me-2">{{movie?.original_title}}</p>
+              <p class="mt-0 mb-2"> - </p>
+              <p class="mt-0 mb-2 ms-2">{{movie?.original_title_romanised}}</p>
+            </div>
             <div class="ano-tempo-genero d-flex">
               <p class="me-2 mt-0">{{movie?.release_date}} &bull;</p>
               <p class="me-2 mt-0">{{movie?.running_time}}min &bull;</p>
