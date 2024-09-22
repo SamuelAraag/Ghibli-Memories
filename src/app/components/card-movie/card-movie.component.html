@@ -1,10 +1,10 @@
 <div class="card-video">
-    <div class="conteudo-card">
+    <div class="card-content">
       <div class="zoom-container ">
         <img src="{{movie?.image}}" alt="poster">
       </div>
-      <div class="informativo-filme">
-        <h4 class="titulo text-truncate w-100">
+      <div class="movie-info">
+        <h4 [title]="movie?.title" class="title text-truncate w-100">
           {{movie?.title?.toUpperCase()}}
         </h4>
         <div class="d-flex">
@@ -13,14 +13,10 @@
           <p class="mt-0 mb-2 ms-2">{{movie?.original_title_romanised}}</p>
         </div>
         <div class="ano-tempo-genero d-flex">
-          <p class="me-2 mt-0">{{movie?.release_date}} &bull;</p>
-          <p class="me-2 mt-0">{{movie?.running_time}}min &bull;</p>
-          <p class="me-2 mt-0">Animation</p>
-        </div>
-        <div class="classificacao circle">
-          <div class="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-          </div>
+          <p class="me-1 mt-0">{{movie?.release_date}} &bull;</p>
+          <p class="me-1 mt-0">{{movie?.running_time}}min &bull;</p>
+          <p class="me-1 mt-0">Animation &bull;</p>
+          <p class="me-1 mt-0">{{movie?.rt_score}}/100</p>
         </div>
         <div class="descricao multiline-truncate">
           <p [title]="movie?.description">

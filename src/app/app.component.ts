@@ -1,7 +1,7 @@
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { lastValueFrom } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Movie } from './models/movie.model';
 import { CommonModule } from '@angular/common';
 import { CardMovieComponent } from "./components/card-movie/card-movie.component";
@@ -14,12 +14,23 @@ import { CardMovieComponent } from "./components/card-movie/card-movie.component
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
-  movies: Movie[] = [];
-  constructor(private http: HttpClient){}
   title = 'ghibli-memories';
 
-  async ngOnInit() {
-    const url = "https://ghibliapi.vercel.app/films";
-    this.movies = await lastValueFrom(this.http.get<Movie[]>(url));
+  $movies: Observable<Movie[]> = new Observable();
+
+  constructor(private http: HttpClient){}
+
+  ngOnInit() {
+    const urlApiGhibli = "https://ghibliapi.vercel.app/films";
+    this.$movies = this.http.get<Movie[]>(urlApiGhibli)
+    .pipe(
+      map((movies: Movie[]) => this.sortMoviesByDate(movies))
+    );
+  }
+
+  private sortMoviesByDate(movies: Movie[]): Movie[] {
+    return movies.sort((a, b) => 
+      Number(b.rt_score) - Number(a.rt_score)
+    );
   }
 }
