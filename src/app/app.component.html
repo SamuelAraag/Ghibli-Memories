@@ -5,7 +5,7 @@
     <div class="container py-4">
       <div class="row gx-5">
         <ng-container>
-            @for (movie of movies; track $index) {
+            @for (movie of ($movies | async); track $index) {
               <div class="itens col-md-12 col-lg-4 mb-lg-0 pb-5">
                 <app-card-movie [movie]="movie"></app-card-movie>
               </div>
