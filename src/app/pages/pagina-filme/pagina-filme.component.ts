@@ -34,6 +34,7 @@ export class PaginaFilmeComponent {
       this.idAtual();
       if (!this.pronto()) return;
       afterNextRender(() => {
+        window.scrollTo({ top: 0 });
         this.elemento.nativeElement.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
       }, { injector: this.injector });
     });
