@@ -1,0 +1,43 @@
+<article class="detalhe">
+  <div class="banner">
+    <img [src]="filme.movie_banner" alt="" width="1280" height="720" decoding="async">
+  </div>
+
+  <div class="corpo">
+    <img
+      class="poster"
+      [src]="filme.image"
+      [alt]="'Pôster de ' + filme.title"
+      [style.view-transition-name]="comTransicao ? 'filme-' + filme.id : null"
+      width="400"
+      height="600"
+      decoding="async">
+
+    <div class="texto">
+      @if (nivelTitulo === 1) {
+        <h1 class="titulo" [id]="idTitulo" tabindex="-1">{{ filme.title }}</h1>
+      } @else {
+        <h2 class="titulo" [id]="idTitulo" tabindex="-1">{{ filme.title }}</h2>
+      }
+
+      @if (filme.original_title) {
+        <p class="titulo-original" lang="ja">
+          {{ filme.original_title }}
+          @if (filme.original_title_romanised) {
+            <span lang="ja-Latn">{{ filme.original_title_romanised }}</span>
+          }
+        </p>
+      }
+
+      <dl class="ficha">
+        <div><dt>Lançamento</dt><dd>{{ filme.release_date }}</dd></div>
+        <div><dt>Duração</dt><dd>{{ filme.running_time }} min</dd></div>
+        <div><dt>Nota</dt><dd class="nota">{{ filme.rt_score }}%</dd></div>
+        <div><dt>Direção</dt><dd>{{ filme.director }}</dd></div>
+        <div><dt>Produção</dt><dd>{{ filme.producer }}</dd></div>
+      </dl>
+
+      <p class="sinopse">{{ filme.description }}</p>
+    </div>
+  </div>
+</article>

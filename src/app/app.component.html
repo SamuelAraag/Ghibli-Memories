@@ -1,3 +1,4 @@
+<div class="lista" [hidden]="emRotaDetalhe()">
 <main class="main">
   <header class="page-header">
     <div>
@@ -30,6 +31,13 @@
             <span class="arrow" aria-hidden="true">↓</span>
           </button>
           <button type="button" [attr.aria-pressed]="ordem() === 'nota'" (click)="ordenarPor('nota')">Nota</button>
+        </div>
+      </div>
+      <div class="sort" role="group" aria-labelledby="rotulo-detalhe">
+        <span class="group-label" id="rotulo-detalhe">Abrir detalhes em</span>
+        <div class="sort-options">
+          <button type="button" [attr.aria-pressed]="modoDetalhe() === 'pagina'" (click)="escolherModoDetalhe('pagina')">Página</button>
+          <button type="button" [attr.aria-pressed]="modoDetalhe() === 'modal'" (click)="escolherModoDetalhe('modal')">Modal</button>
         </div>
       </div>
     </section>
@@ -97,7 +105,7 @@
               [class.entering]="primeiraRenderizacao()"
               [style.--i]="indice"
               [style.view-transition-name]="'filme-' + movie.id">
-              <app-card-movie [movie]="movie"></app-card-movie>
+              <app-card-movie [movie]="movie" (abrir)="abrirFilme($event)"></app-card-movie>
             </li>
           }
         </ul>
@@ -120,3 +128,20 @@
 <footer class="site-footer">
   <p>by <a href="https://samuelaraag.github.io/portfolio-samuel-araag/" target="_blank" rel="noopener">Samuel Araag</a></p>
 </footer>
+</div>
+
+<router-outlet />
+
+<dialog
+  #dialogoFilme
+  class="dialogo-filme"
+  aria-labelledby="titulo-filme-modal"
+  (cancel)="aoCancelarDialogo($event)"
+  (click)="aoClicarDialogo($event)">
+  @if (filmeModal(); as filme) {
+    <button type="button" class="fechar-dialogo" aria-label="Fechar detalhes" (click)="fecharModal()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+    <app-detalhe-filme [filme]="filme" idTitulo="titulo-filme-modal" [nivelTitulo]="2" [comTransicao]="false"></app-detalhe-filme>
+  }
+</dialog>

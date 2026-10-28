@@ -1,0 +1,156 @@
+:host {
+    display: block;
+}
+
+.banner {
+    position: relative;
+    aspect-ratio: 16 / 7;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+
+    img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        animation: banner-entrar 1.2s var(--ease-smooth) both;
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, var(--bg) 0%, var(--overlay-soft) 45%, transparent 100%);
+    }
+}
+
+.corpo {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(120px, 220px) 1fr;
+    gap: 28px;
+    margin-top: -96px;
+    padding: 0 24px;
+}
+
+.poster {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 2 / 3;
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-raised);
+    object-fit: cover;
+}
+
+.texto {
+    align-self: end;
+    min-width: 0;
+    animation: card-enter var(--dur-in) var(--ease-smooth) 0.1s both;
+}
+
+.titulo {
+    margin: 0;
+    color: var(--text-strong);
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.15;
+
+    &:focus {
+        outline: none;
+    }
+}
+
+.titulo-original {
+    margin: 6px 0 0;
+    font-weight: 600;
+
+    span {
+        display: block;
+        color: var(--text-muted);
+        font-weight: 400;
+        font-style: italic;
+    }
+}
+
+.ficha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin: 24px 0;
+
+    dt {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 400;
+    }
+
+    dd {
+        margin: 2px 0 0;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .nota {
+        color: var(--accent);
+    }
+}
+
+.sinopse {
+    max-width: 65ch;
+    margin: 0;
+    color: var(--text);
+    line-height: 1.65;
+}
+
+@keyframes banner-entrar {
+    from {
+        opacity: 0;
+        transform: scale(1.06);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@media (max-width: 599px) {
+    .banner {
+        aspect-ratio: 16 / 9;
+    }
+
+    .corpo {
+        grid-template-columns: 112px 1fr;
+        gap: 16px;
+        margin-top: -56px;
+        padding: 0 4px;
+    }
+
+    .texto {
+        display: contents;
+    }
+
+    .titulo,
+    .titulo-original {
+        align-self: end;
+    }
+
+    .titulo {
+        grid-column: 2;
+    }
+
+    .titulo-original {
+        grid-column: 1 / -1;
+    }
+
+    .ficha,
+    .sinopse {
+        grid-column: 1 / -1;
+    }
+
+    .ficha {
+        margin: 4px 0 8px;
+    }
+}

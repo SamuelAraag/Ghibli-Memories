@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Movie } from '../../models/movie.model';
 
 @Component({
@@ -11,6 +11,7 @@ import { Movie } from '../../models/movie.model';
 
 export class CardMovieComponent {
   @Input() movie?: Movie;
+  @Output() abrir = new EventEmitter<Movie>();
 
   ativo = false;
 
@@ -37,8 +38,11 @@ export class CardMovieComponent {
   }
 
   alternar() {
-    if (window.matchMedia('(hover: hover)').matches) return;
-    this.ativo = !this.ativo;
+    if (this.ativo || window.matchMedia('(hover: hover)').matches) {
+      if (this.movie) this.abrir.emit(this.movie);
+      return;
+    }
+    this.ativo = true;
   }
 
   aoFocar(botao: HTMLElement) {

@@ -1,0 +1,34 @@
+<div class="pagina">
+  <button type="button" class="voltar" (click)="voltar()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+    Todos os filmes
+  </button>
+
+  @switch (filmesService.estado()) {
+    @case ('carregando') {
+      <div class="esqueleto" aria-busy="true" aria-label="Carregando filme">
+        <div class="skeleton-line banner"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+      </div>
+    }
+    @case ('erro') {
+      <section class="feedback" role="alert">
+        <h1>Não foi possível carregar o filme</h1>
+        <p>A API do Studio Ghibli não respondeu. Confira a conexão e tente de novo.</p>
+        <button type="button" class="btn-outline" (click)="filmesService.carregar()">Tentar de novo</button>
+      </section>
+    }
+    @case ('pronto') {
+      @if (filme(); as filme) {
+        <app-detalhe-filme [filme]="filme"></app-detalhe-filme>
+      } @else {
+        <section class="feedback">
+          <h1>Filme não encontrado</h1>
+          <p>O link pode estar incompleto ou o filme saiu da API.</p>
+          <button type="button" class="btn-outline" (click)="voltar()">Ver todos os filmes</button>
+        </section>
+      }
+    }
+  }
+</div>
