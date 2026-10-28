@@ -10,7 +10,4 @@ import { Movie } from '../../models/movie.model';
 })
 export class DetalheFilmeComponent {
   @Input({ required: true }) filme!: Movie;
-  @Input() idTitulo = 'titulo-filme';
-  @Input() nivelTitulo: 1 | 2 = 1;
-  @Input() comTransicao = true;
 }

@@ -8,17 +8,13 @@
       class="poster"
       [src]="filme.image"
       [alt]="'Pôster de ' + filme.title"
-      [style.view-transition-name]="comTransicao ? 'filme-' + filme.id : null"
+      [style.view-transition-name]="'filme-' + filme.id"
       width="400"
       height="600"
       decoding="async">
 
     <div class="texto">
-      @if (nivelTitulo === 1) {
-        <h1 class="titulo" [id]="idTitulo" tabindex="-1">{{ filme.title }}</h1>
-      } @else {
-        <h2 class="titulo" [id]="idTitulo" tabindex="-1">{{ filme.title }}</h2>
-      }
+      <h1 class="titulo" tabindex="-1">{{ filme.title }}</h1>
 
       @if (filme.original_title) {
         <p class="titulo-original" lang="ja">

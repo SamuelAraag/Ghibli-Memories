@@ -29,8 +29,6 @@
         #botao
         type="button"
         class="card-action"
-        [attr.aria-expanded]="ativo"
-        [attr.aria-controls]="'info-' + movie.id"
         [attr.aria-label]="'Ver detalhes de ' + movie.title"
         (click)="alternar()"
         (focus)="aoFocar(botao)"

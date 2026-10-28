@@ -1,6 +1,5 @@
 import { Component, OnInit, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef, ViewChildren, QueryList, HostListener, ElementRef, ViewChild, DestroyRef } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Location } from '@angular/common';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { Movie } from './models/movie.model';
@@ -8,20 +7,16 @@ import { CardMovieComponent } from "./components/card-movie/card-movie.component
 import { BuscaRapidaComponent, AcaoRapida } from './components/busca-rapida/busca-rapida.component';
 import { posicaoPopularidade } from './data/popularidade';
 import { FilmesService } from './services/filmes.service';
-import { DetalheFilmeComponent } from './components/detalhe-filme/detalhe-filme.component';
 
 type Ordem = 'famosos' | 'lancamento' | 'nota';
 type Direcao = 'desc' | 'asc';
-type ModoDetalhe = 'pagina' | 'modal';
-
-const CHAVE_MODO_DETALHE = 'ghibli-modo-detalhe';
 
 const DIRETORES_PRINCIPAIS = ['Hayao Miyazaki', 'Isao Takahata', 'Gorō Miyazaki'];
 const OUTROS_DIRETORES = 'Outros';
 
 @Component({
     selector: 'app-root',
-    imports: [CardMovieComponent, BuscaRapidaComponent, DetalheFilmeComponent, RouterOutlet],
+    imports: [CardMovieComponent, BuscaRapidaComponent, RouterOutlet],
     templateUrl: './app.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './app.component.scss'
@@ -31,13 +26,10 @@ export class AppComponent implements OnInit {
 
   @ViewChildren(CardMovieComponent) cards!: QueryList<CardMovieComponent>;
   @ViewChild('titulo') titulo!: ElementRef<HTMLElement>;
-  @ViewChild('dialogoFilme') dialogoFilme!: ElementRef<HTMLDialogElement>;
 
   filmes = this.filmesService.filmes;
   estado = this.filmesService.estado;
-  modoDetalhe = signal<ModoDetalhe>(this.lerModoDetalhe());
   emRotaDetalhe = signal(false);
-  filmeModal = signal<Movie | null>(null);
   ordem = signal<Ordem>('famosos');
   direcao = signal<Direcao>('desc');
   diretores = signal<Set<string>>(new Set());
@@ -84,7 +76,6 @@ export class AppComponent implements OnInit {
     private filmesService: FilmesService,
     private detector: ChangeDetectorRef,
     private router: Router,
-    private location: Location,
     private destroyRef: DestroyRef
   ) {}
 
@@ -100,47 +91,10 @@ export class AppComponent implements OnInit {
     this.filmesService.carregar();
   }
 
-  escolherModoDetalhe(modo: ModoDetalhe) {
-    this.modoDetalhe.set(modo);
-    try {
-      localStorage.setItem(CHAVE_MODO_DETALHE, modo);
-    } catch {}
-  }
-
   abrirFilme(filme: Movie) {
     this.cards?.forEach((card) => card.desativar());
-    if (this.modoDetalhe() === 'pagina') {
-      this.rolagemLista = window.scrollY;
-      this.router.navigate(['filme', filme.id]);
-      return;
-    }
-    const parametros = new URLSearchParams(window.location.search);
-    parametros.set('filme', filme.id);
-    this.router.navigateByUrl(`/?${parametros}`);
-  }
-
-  fecharModal() {
-    if (!new URLSearchParams(window.location.search).has('filme')) {
-      this.fecharDialogo();
-      return;
-    }
-    if (this.router.lastSuccessfulNavigation()?.previousNavigation) {
-      this.location.back();
-      return;
-    }
-    const parametros = new URLSearchParams(window.location.search);
-    parametros.delete('filme');
-    const busca = parametros.toString();
-    this.router.navigateByUrl(busca ? `/?${busca}` : '/', { replaceUrl: true });
-  }
-
-  aoClicarDialogo(evento: MouseEvent) {
-    if (evento.target === this.dialogoFilme.nativeElement) this.fecharModal();
-  }
-
-  aoCancelarDialogo(evento: Event) {
-    evento.preventDefault();
-    this.fecharModal();
+    this.rolagemLista = window.scrollY;
+    this.router.navigate(['filme', filme.id]);
   }
 
   @HostListener('window:scroll')
@@ -261,45 +215,6 @@ export class AppComponent implements OnInit {
       this.detector.detectChanges();
       window.scrollTo({ top: this.rolagemLista });
     }
-    const idFilme = new URLSearchParams(window.location.search).get('filme');
-    if (noDetalhe || !idFilme) {
-      this.fecharDialogo();
-      return;
-    }
-    this.abrirDialogoQuandoCarregar(idFilme);
-  }
-
-  private abrirDialogoQuandoCarregar(idFilme: string) {
-    if (this.estado() === 'carregando') {
-      setTimeout(() => this.abrirDialogoQuandoCarregar(idFilme), 100);
-      return;
-    }
-    const filme = this.filmesService.buscar(idFilme);
-    if (!filme) {
-      this.fecharModal();
-      return;
-    }
-    this.filmeModal.set(filme);
-    this.detector.detectChanges();
-    const dialogo = this.dialogoFilme.nativeElement;
-    if (!dialogo.open) dialogo.showModal();
-    dialogo.querySelector<HTMLElement>('.titulo')?.focus();
-  }
-
-  private fecharDialogo() {
-    const dialogo = this.dialogoFilme?.nativeElement;
-    if (dialogo?.open) dialogo.close();
-    setTimeout(() => {
-      if (!this.dialogoFilme?.nativeElement.open) this.filmeModal.set(null);
-    }, 400);
-  }
-
-  private lerModoDetalhe(): ModoDetalhe {
-    try {
-      return localStorage.getItem(CHAVE_MODO_DETALHE) === 'modal' ? 'modal' : 'pagina';
-    } catch {
-      return 'pagina';
-    }
   }
 
   private lerUrl() {
@@ -319,8 +234,6 @@ export class AppComponent implements OnInit {
     if (this.ordem() === 'lancamento') parametros.set('direcao', this.direcao());
     this.diretores().forEach((d) => parametros.append('diretor', d));
     this.decadas().forEach((d) => parametros.append('decada', d));
-    const filme = new URLSearchParams(window.location.search).get('filme');
-    if (filme) parametros.set('filme', filme);
     const busca = parametros.toString();
     history.replaceState(history.state, '', busca ? `?${busca}` : window.location.pathname);
   }

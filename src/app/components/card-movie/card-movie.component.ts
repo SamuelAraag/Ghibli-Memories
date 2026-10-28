@@ -38,11 +38,7 @@ export class CardMovieComponent {
   }
 
   alternar() {
-    if (this.ativo || window.matchMedia('(hover: hover)').matches) {
-      if (this.movie) this.abrir.emit(this.movie);
-      return;
-    }
-    this.ativo = true;
+    if (this.movie) this.abrir.emit(this.movie);
   }
 
   aoFocar(botao: HTMLElement) {
