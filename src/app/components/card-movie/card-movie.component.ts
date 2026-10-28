@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Movie } from '../../models/movie.model';
 
 @Component({
@@ -14,7 +14,7 @@ export class CardMovieComponent {
 
   ativo = false;
 
-  constructor(private elemento: ElementRef<HTMLElement>) {}
+  constructor(private elemento: ElementRef<HTMLElement>, private detector: ChangeDetectorRef) {}
 
   @HostListener('pointerenter', ['$event'])
   aoEntrarPonteiro(evento: PointerEvent) {
@@ -33,7 +33,7 @@ export class CardMovieComponent {
 
   @HostListener('document:click', ['$event'])
   aoClicarFora(evento: MouseEvent) {
-    if (!this.elemento.nativeElement.contains(evento.target as Node)) this.ativo = false;
+    if (!this.elemento.nativeElement.contains(evento.target as Node) && !(evento.target as HTMLElement).closest('dialog')) this.ativo = false;
   }
 
   alternar() {
@@ -43,5 +43,19 @@ export class CardMovieComponent {
 
   aoFocar(botao: HTMLElement) {
     if (botao.matches(':focus-visible')) this.ativo = true;
+  }
+
+  destacar() {
+    const host = this.elemento.nativeElement;
+    const poster = host.querySelector<HTMLElement>('.poster');
+    host.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    poster?.classList.remove('highlight');
+    void poster?.offsetWidth;
+    poster?.classList.add('highlight');
+    setTimeout(() => {
+      this.ativo = true;
+      this.detector.detectChanges();
+      host.querySelector<HTMLElement>('.card-action')?.focus({ preventScroll: true });
+    }, 450);
   }
 }

@@ -1,10 +1,61 @@
 <main class="main">
   <header class="page-header">
-    <h1>Ghibli Memories</h1>
-    @if (estado() === 'pronto' && filmes().length) {
-      <p class="subtitle">{{ filmes().length }} filmes, mais bem avaliados primeiro</p>
-    }
+    <div>
+      <h1 #titulo tabindex="-1">Ghibli Memories</h1>
+      @if (estado() === 'pronto' && filmes().length) {
+        <p class="subtitle" aria-live="polite">{{ textoContagem() }}</p>
+      }
+    </div>
+    <app-busca-rapida
+      [filmes]="filmes()"
+      [acoes]="acoesRapidas()"
+      (escolherFilme)="irParaFilme($event)"
+      (escolherAcao)="executarAcao($event)">
+    </app-busca-rapida>
   </header>
+
+  @if (estado() === 'pronto' && filmes().length) {
+    <section class="toolbar" aria-label="Ordenação e filtros">
+      <div class="sort" role="group" aria-labelledby="rotulo-ordem">
+        <span class="group-label" id="rotulo-ordem">Ordenar</span>
+        <div class="sort-options">
+          <button type="button" [attr.aria-pressed]="ordem() === 'famosos'" (click)="ordenarPor('famosos')">Mais famosos</button>
+          <button
+            type="button"
+            [attr.aria-pressed]="ordem() === 'lancamento'"
+            [attr.aria-label]="rotuloLancamento()"
+            [attr.data-direcao]="direcao()"
+            (click)="ordenarPor('lancamento')">
+            <span>Lançamento</span>
+            <span class="arrow" aria-hidden="true">↓</span>
+          </button>
+          <button type="button" [attr.aria-pressed]="ordem() === 'nota'" (click)="ordenarPor('nota')">Nota</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="filter-bar">
+      <div class="filters" role="group" aria-label="Filtrar">
+        <div class="filter-group">
+          <span class="group-label">Diretor</span>
+          <div class="chip-row">
+            @for (diretor of opcoesDiretor; track diretor) {
+              <button type="button" class="chip" [attr.aria-pressed]="diretores().has(diretor)" (click)="alternarDiretor(diretor)">{{ diretor }}</button>
+            }
+          </div>
+        </div>
+        <div class="filter-group">
+          <span class="group-label">Década</span>
+          <div class="chip-row">
+            @for (decada of opcoesDecada; track decada) {
+              <button type="button" class="chip" [attr.aria-pressed]="decadas().has(decada)" (click)="alternarDecada(decada)">{{ rotuloDecada(decada) }}</button>
+            }
+          </div>
+        </div>
+      </div>
+      <button type="button" class="link-button" [class.visible]="temFiltro()" [attr.tabindex]="temFiltro() ? null : -1" (click)="limparFiltros()">Limpar filtros</button>
+    </div>
+  }
 
   @switch (estado()) {
     @case ('carregando') {
@@ -22,25 +73,50 @@
       <section class="feedback" role="alert">
         <h2>Não foi possível carregar os filmes</h2>
         <p>A API do Studio Ghibli não respondeu. Confira a conexão e tente de novo.</p>
-        <button type="button" class="btn-retry" (click)="carregarFilmes()">Tentar de novo</button>
+        <button type="button" class="btn-outline" (click)="carregarFilmes()">Tentar de novo</button>
       </section>
     }
     @case ('pronto') {
-      @if (filmes().length) {
+      @if (!filmes().length) {
+        <section class="feedback">
+          <h2>Nenhum filme encontrado</h2>
+          <p>A API devolveu uma lista vazia.</p>
+          <button type="button" class="btn-outline" (click)="carregarFilmes()">Recarregar</button>
+        </section>
+      } @else if (!filmesVisiveis().length) {
+        <section class="feedback">
+          <h2>Nenhum filme com esses filtros</h2>
+          <p>Tire um diretor ou uma década para ver mais resultados.</p>
+          <button type="button" class="btn-outline" (click)="limparFiltros()">Limpar filtros</button>
+        </section>
+      } @else {
         <ul class="movie-grid">
-          @for (movie of filmes(); track movie.id; let indice = $index) {
-            <li class="movie-item" [style.--i]="indice">
+          @for (movie of filmesVisiveis(); track movie.id; let indice = $index) {
+            <li
+              class="movie-item"
+              [class.entering]="primeiraRenderizacao()"
+              [style.--i]="indice"
+              [style.view-transition-name]="'filme-' + movie.id">
               <app-card-movie [movie]="movie"></app-card-movie>
             </li>
           }
         </ul>
-      } @else {
-        <section class="feedback">
-          <h2>Nenhum filme encontrado</h2>
-          <p>A API devolveu uma lista vazia.</p>
-          <button type="button" class="btn-retry" (click)="carregarFilmes()">Recarregar</button>
-        </section>
       }
     }
   }
 </main>
+
+<button
+  type="button"
+  class="back-to-top"
+  [class.visible]="mostrarVoltarAoTopo()"
+  [attr.tabindex]="mostrarVoltarAoTopo() ? null : -1"
+  [attr.aria-hidden]="!mostrarVoltarAoTopo()"
+  aria-label="Voltar ao topo"
+  (click)="voltarAoTopo()">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+</button>
+
+<footer class="site-footer">
+  <p>by <a href="https://samuelaraag.github.io/portfolio-samuel-araag/" target="_blank" rel="noopener">Samuel Araag</a></p>
+</footer>
