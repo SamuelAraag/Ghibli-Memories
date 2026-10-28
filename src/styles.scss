@@ -3,10 +3,13 @@
     --bg-glow: #1d2a33;
     --surface: #1a1d22;
     --surface-raised: #23272e;
+    --border: #2e333b;
     --text: #e8e6e3;
     --text-strong: #ffffff;
     --text-muted: #a3a8b0;
-    --accent: #7cc4a4;
+    --accent: #9ccc65;
+    --accent-soft: rgba(156, 204, 101, 0.14);
+    --backdrop: rgba(6, 8, 10, 0.6);
     --overlay: rgba(10, 12, 15, 0.94);
     --overlay-soft: rgba(10, 12, 15, 0.55);
     --shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
@@ -34,7 +37,21 @@ body {
     background-attachment: fixed;
 }
 
+::view-transition-group(*) {
+    animation-duration: 0.5s;
+    animation-timing-function: var(--ease-smooth);
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+    height: 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*) {
+        animation: none !important;
+    }
+
     *,
     *::before,
     *::after {
