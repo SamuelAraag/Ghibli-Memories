@@ -29,12 +29,11 @@ export class PaginaFilmeComponent {
     private injector: Injector
   ) {
     this.filmesService.carregarSeNecessario();
-    window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: 'instant' });
     effect(() => {
       this.idAtual();
       if (!this.pronto()) return;
       afterNextRender(() => {
-        window.scrollTo({ top: 0 });
         this.elemento.nativeElement.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
       }, { injector: this.injector });
     });
