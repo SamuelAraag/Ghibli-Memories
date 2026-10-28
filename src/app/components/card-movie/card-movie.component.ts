@@ -1,5 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Movie } from '../../models/movie.model';
+import { normalizarTexto } from '../../util/texto';
 
 @Component({
     selector: 'app-card-movie',
@@ -18,17 +19,14 @@ export class CardMovieComponent {
 
   trechoTitulo(): { antes: string; destaque: string; depois: string } {
     const titulo = this.movie?.title ?? '';
-    const termo = this.normalizar(this.termoBusca);
+    const termo = normalizarTexto(this.termoBusca);
     if (!termo) return { antes: titulo, destaque: '', depois: '' };
-    const indice = this.normalizar(titulo).indexOf(termo);
+    const indice = normalizarTexto(titulo).indexOf(termo);
     if (indice < 0) return { antes: titulo, destaque: '', depois: '' };
     const tamanho = this.termoBusca.trim().length;
     return { antes: titulo.slice(0, indice), destaque: titulo.slice(indice, indice + tamanho), depois: titulo.slice(indice + tamanho) };
   }
 
-  private normalizar(texto: string): string {
-    return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  }
 
   constructor(private elemento: ElementRef<HTMLElement>, private detector: ChangeDetectorRef) {}
 

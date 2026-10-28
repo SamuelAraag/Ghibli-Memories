@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef, ViewChildren, QueryList, HostListener, ElementRef, ViewChild, DestroyRef, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef, ViewChildren, QueryList, HostListener, ElementRef, ViewChild, DestroyRef, inject } from '@angular/core';
 import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
@@ -6,6 +6,7 @@ import { filter } from 'rxjs';
 import { Movie } from './models/movie.model';
 import { CardMovieComponent } from "./components/card-movie/card-movie.component";
 import { posicaoPopularidade } from './data/popularidade';
+import { normalizarTexto } from './util/texto';
 import { FilmesService } from './services/filmes.service';
 import { CAMINHO_FILME, ehRotaFilme } from './app.routes';
 
@@ -22,9 +23,9 @@ const OUTROS_DIRETORES = 'Outros';
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
   title = 'ghibli-memories';
-  ehMac = /Mac|iPhone|iPad/.test(navigator.platform);
+  ehMac = /Mac|iPhone|iPad/.test(navigator.userAgent);
 
   @ViewChildren(CardMovieComponent) cards!: QueryList<CardMovieComponent>;
   @ViewChild('titulo') titulo!: ElementRef<HTMLElement>;
@@ -48,12 +49,12 @@ export class AppComponent implements OnInit {
   temFiltro = computed(() => !!this.busca() || this.diretores().size > 0 || this.decadas().size > 0);
 
   filmesVisiveis = computed(() => {
-    const busca = this.normalizar(this.busca());
+    const busca = normalizarTexto(this.busca());
     const diretores = this.diretores();
     const decadas = this.decadas();
     const lista = this.filmes().filter((filme) =>
       (!busca || [filme.title, filme.original_title, filme.original_title_romanised]
-        .some((campo) => this.normalizar(campo ?? '').includes(busca))) &&
+        .some((campo) => normalizarTexto(campo ?? '').includes(busca))) &&
       (!diretores.size || diretores.has(this.diretorDoFiltro(filme))) &&
       (!decadas.size || decadas.has(this.decadaDe(filme)))
     );
@@ -86,6 +87,10 @@ export class AppComponent implements OnInit {
       .subscribe(() => this.sincronizarComUrl());
   }
 
+  ngAfterViewInit() {
+    this.entradaBusca.nativeElement.value = this.busca();
+  }
+
   carregarFilmes() {
     this.filmesService.carregar();
   }
@@ -107,8 +112,10 @@ export class AppComponent implements OnInit {
 
   @HostListener('document:keydown', ['$event'])
   focarBuscaPorAtalho(evento: KeyboardEvent) {
-    const atalhoBusca = evento.key.toLowerCase() === 'k' && (this.ehMac ? evento.metaKey : evento.ctrlKey);
-    if (!atalhoBusca || this.emRotaDetalhe()) return;
+    const alvo = evento.target as HTMLElement;
+    const atalhoK = evento.key.toLowerCase() === 'k' && (this.ehMac ? evento.metaKey : evento.ctrlKey);
+    const barra = evento.key === '/' && !['INPUT', 'TEXTAREA'].includes(alvo.tagName);
+    if ((!atalhoK && !barra) || this.emRotaDetalhe()) return;
     evento.preventDefault();
     this.entradaBusca?.nativeElement.focus();
     this.entradaBusca?.nativeElement.select();
@@ -155,6 +162,7 @@ export class AppComponent implements OnInit {
   limparFiltros() {
     this.aplicar(() => {
       this.busca.set('');
+      if (this.entradaBusca) this.entradaBusca.nativeElement.value = '';
       this.diretores.set(new Set());
       this.decadas.set(new Set());
     });
@@ -253,7 +261,4 @@ export class AppComponent implements OnInit {
     history.replaceState(history.state, '', busca ? `?${busca}` : window.location.pathname);
   }
 
-  private normalizar(texto: string): string {
-    return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-  }
 }
