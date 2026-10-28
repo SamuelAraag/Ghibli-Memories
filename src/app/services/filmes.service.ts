@@ -6,7 +6,7 @@ export type EstadoCarregamento = 'carregando' | 'pronto' | 'erro';
 
 @Injectable({ providedIn: 'root' })
 export class FilmesService {
-  private readonly urlApiGhibli = 'https://ghibliapi.vercel.app/films';
+  private readonly urlApiGhibli = 'https://ghibliapi.dev/films';
 
   filmes = signal<Movie[]>([]);
   estado = signal<EstadoCarregamento>('carregando');
