@@ -1,3 +1,4 @@
+<div class="lista" [hidden]="emRotaDetalhe()">
 <main class="main">
   <header class="page-header">
     <div>
@@ -9,6 +10,7 @@
     <app-busca-rapida
       [filmes]="filmes()"
       [acoes]="acoesRapidas()"
+      [ativa]="!emRotaDetalhe()"
       (escolherFilme)="irParaFilme($event)"
       (escolherAcao)="executarAcao($event)">
     </app-busca-rapida>
@@ -97,7 +99,7 @@
               [class.entering]="primeiraRenderizacao()"
               [style.--i]="indice"
               [style.view-transition-name]="'filme-' + movie.id">
-              <app-card-movie [movie]="movie"></app-card-movie>
+              <app-card-movie [movie]="movie" (abrir)="abrirFilme($event)"></app-card-movie>
             </li>
           }
         </ul>
@@ -120,3 +122,7 @@
 <footer class="site-footer">
   <p>by <a href="https://samuelaraag.github.io/portfolio-samuel-araag/" target="_blank" rel="noopener">Samuel Araag</a></p>
 </footer>
+</div>
+
+<router-outlet />
+

@@ -1,11 +1,15 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef, ViewChildren, QueryList, HostListener, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef, ViewChildren, QueryList, HostListener, ElementRef, ViewChild, DestroyRef, inject } from '@angular/core';
+import { Location } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { Movie } from './models/movie.model';
 import { CardMovieComponent } from "./components/card-movie/card-movie.component";
 import { BuscaRapidaComponent, AcaoRapida } from './components/busca-rapida/busca-rapida.component';
 import { posicaoPopularidade } from './data/popularidade';
+import { FilmesService } from './services/filmes.service';
+import { CAMINHO_FILME, ehRotaFilme } from './app.routes';
 
-type EstadoCarregamento = 'carregando' | 'pronto' | 'erro';
 type Ordem = 'famosos' | 'lancamento' | 'nota';
 type Direcao = 'desc' | 'asc';
 
@@ -14,7 +18,7 @@ const OUTROS_DIRETORES = 'Outros';
 
 @Component({
     selector: 'app-root',
-    imports: [CardMovieComponent, BuscaRapidaComponent],
+    imports: [CardMovieComponent, BuscaRapidaComponent, RouterOutlet],
     templateUrl: './app.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './app.component.scss'
@@ -25,8 +29,9 @@ export class AppComponent implements OnInit {
   @ViewChildren(CardMovieComponent) cards!: QueryList<CardMovieComponent>;
   @ViewChild('titulo') titulo!: ElementRef<HTMLElement>;
 
-  filmes = signal<Movie[]>([]);
-  estado = signal<EstadoCarregamento>('carregando');
+  filmes = this.filmesService.filmes;
+  estado = this.filmesService.estado;
+  emRotaDetalhe = signal(ehRotaFilme(inject(Location).path()));
   ordem = signal<Ordem>('famosos');
   direcao = signal<Direcao>('desc');
   diretores = signal<Set<string>>(new Set());
@@ -67,28 +72,39 @@ export class AppComponent implements OnInit {
     return acoes;
   });
 
-  constructor(private http: HttpClient, private detector: ChangeDetectorRef){}
+  private rolagemLista = 0;
+  private idUltimoFilme = '';
+
+  constructor(
+    private filmesService: FilmesService,
+    private detector: ChangeDetectorRef,
+    private router: Router,
+    private destroyRef: DestroyRef
+  ) {}
 
   ngOnInit() {
     this.lerUrl();
-    this.carregarFilmes();
+    this.filmesService.carregarSeNecessario();
+    this.router.events
+      .pipe(filter((evento) => evento instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.sincronizarComUrl());
   }
 
   carregarFilmes() {
-    const urlApiGhibli = "https://ghibliapi.vercel.app/films";
-    this.estado.set('carregando');
-    this.http.get<Movie[]>(urlApiGhibli)
-    .subscribe({
-      next: (movies) => {
-        this.filmes.set(movies);
-        this.estado.set('pronto');
-      },
-      error: () => this.estado.set('erro')
-    });
+    this.filmesService.carregar();
+  }
+
+  abrirFilme(filme: Movie) {
+    this.cards?.forEach((card) => card.desativar());
+    this.rolagemLista = window.scrollY;
+    this.idUltimoFilme = filme.id;
+    this.filmesService.veioDaLista = true;
+    this.router.navigate([CAMINHO_FILME, filme.id]);
   }
 
   @HostListener('window:scroll')
   aoRolar() {
+    if (this.emRotaDetalhe()) return;
     const mostrar = window.scrollY > window.innerHeight * 0.8;
     if (mostrar !== this.mostrarVoltarAoTopo()) this.mostrarVoltarAoTopo.set(mostrar);
   }
@@ -196,6 +212,21 @@ export class AppComponent implements OnInit {
     return novo;
   }
 
+  private sincronizarComUrl() {
+    const estavaNoDetalhe = this.emRotaDetalhe();
+    const noDetalhe = ehRotaFilme(this.router.url);
+    this.emRotaDetalhe.set(noDetalhe);
+    if (estavaNoDetalhe && !noDetalhe) {
+      this.detector.detectChanges();
+      window.scrollTo({ top: this.rolagemLista });
+      this.focarCardDoUltimoFilme();
+    }
+  }
+
+  private focarCardDoUltimoFilme() {
+    this.cards?.find((card) => card.movie?.id === this.idUltimoFilme)?.focar();
+  }
+
   private lerUrl() {
     const parametros = new URLSearchParams(window.location.search);
     const ordem = parametros.get('ordem');
@@ -214,6 +245,6 @@ export class AppComponent implements OnInit {
     this.diretores().forEach((d) => parametros.append('diretor', d));
     this.decadas().forEach((d) => parametros.append('decada', d));
     const busca = parametros.toString();
-    history.replaceState(null, '', busca ? `?${busca}` : window.location.pathname);
+    history.replaceState(history.state, '', busca ? `?${busca}` : window.location.pathname);
   }
 }

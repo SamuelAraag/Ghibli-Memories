@@ -22,14 +22,13 @@
         }
         <p class="meta">{{ movie.running_time }} min &bull; {{ movie.director }}</p>
         <p class="description">{{ movie.description }}</p>
+        <p class="ver-detalhes" aria-hidden="true">Ver detalhes</p>
       </div>
 
       <button
         #botao
         type="button"
         class="card-action"
-        [attr.aria-expanded]="ativo"
-        [attr.aria-controls]="'info-' + movie.id"
         [attr.aria-label]="'Ver detalhes de ' + movie.title"
         (click)="alternar()"
         (focus)="aoFocar(botao)"

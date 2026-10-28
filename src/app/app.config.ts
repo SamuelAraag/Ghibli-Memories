@@ -1,9 +1,23 @@
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 
-import { routes } from './app.routes';
+import { ehRotaFilme, routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideHttpClient(withFetch())]
+  providers: [
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      withViewTransitions({
+        skipInitialTransition: true,
+        onViewTransitionCreated: ({ transition, from, to }) => {
+          const ehPaginaFilme = (rota: typeof from) => ehRotaFilme('/' + rota.firstChild?.url.map((s) => s.path).join('/'));
+          const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (reduzirMovimento || ehPaginaFilme(from) === ehPaginaFilme(to)) transition.skipTransition();
+        }
+      })
+    ),
+    provideHttpClient(withFetch())
+  ]
 };
