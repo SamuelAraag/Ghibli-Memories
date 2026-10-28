@@ -11,9 +11,24 @@ import { Movie } from '../../models/movie.model';
 
 export class CardMovieComponent {
   @Input() movie?: Movie;
+  @Input() termoBusca = '';
   @Output() abrir = new EventEmitter<Movie>();
 
   ativo = false;
+
+  trechoTitulo(): { antes: string; destaque: string; depois: string } {
+    const titulo = this.movie?.title ?? '';
+    const termo = this.normalizar(this.termoBusca);
+    if (!termo) return { antes: titulo, destaque: '', depois: '' };
+    const indice = this.normalizar(titulo).indexOf(termo);
+    if (indice < 0) return { antes: titulo, destaque: '', depois: '' };
+    const tamanho = this.termoBusca.trim().length;
+    return { antes: titulo.slice(0, indice), destaque: titulo.slice(indice, indice + tamanho), depois: titulo.slice(indice + tamanho) };
+  }
+
+  private normalizar(texto: string): string {
+    return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  }
 
   constructor(private elemento: ElementRef<HTMLElement>, private detector: ChangeDetectorRef) {}
 

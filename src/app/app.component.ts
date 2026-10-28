@@ -5,7 +5,6 @@ import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { Movie } from './models/movie.model';
 import { CardMovieComponent } from "./components/card-movie/card-movie.component";
-import { BuscaRapidaComponent, AcaoRapida } from './components/busca-rapida/busca-rapida.component';
 import { posicaoPopularidade } from './data/popularidade';
 import { FilmesService } from './services/filmes.service';
 import { CAMINHO_FILME, ehRotaFilme } from './app.routes';
@@ -18,16 +17,18 @@ const OUTROS_DIRETORES = 'Outros';
 
 @Component({
     selector: 'app-root',
-    imports: [CardMovieComponent, BuscaRapidaComponent, RouterOutlet],
+    imports: [CardMovieComponent, RouterOutlet],
     templateUrl: './app.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
   title = 'ghibli-memories';
+  ehMac = /Mac|iPhone|iPad/.test(navigator.platform);
 
   @ViewChildren(CardMovieComponent) cards!: QueryList<CardMovieComponent>;
   @ViewChild('titulo') titulo!: ElementRef<HTMLElement>;
+  @ViewChild('entradaBusca') entradaBusca!: ElementRef<HTMLInputElement>;
 
   filmes = this.filmesService.filmes;
   estado = this.filmesService.estado;
@@ -66,16 +67,6 @@ export class AppComponent implements OnInit {
     return visiveis === total ? base : `${base} de ${total}`;
   });
 
-  acoesRapidas = computed<AcaoRapida[]>(() => {
-    const acoes: AcaoRapida[] = [
-      { id: 'famosos', rotulo: 'Ordenar por mais famosos', icone: '★' },
-      { id: 'recentes', rotulo: 'Ordenar por lançamento, mais recentes', icone: '↓' },
-      { id: 'antigos', rotulo: 'Ordenar por lançamento, mais antigos', icone: '↑' },
-    ];
-    if (this.temFiltro()) acoes.push({ id: 'limpar', rotulo: 'Limpar filtros', icone: '✕' });
-    return acoes;
-  });
-
   private rolagemLista = 0;
   private idUltimoFilme = '';
   private esperaBusca?: ReturnType<typeof setTimeout>;
@@ -112,6 +103,15 @@ export class AppComponent implements OnInit {
     if (this.emRotaDetalhe()) return;
     const mostrar = window.scrollY > window.innerHeight * 0.8;
     if (mostrar !== this.mostrarVoltarAoTopo()) this.mostrarVoltarAoTopo.set(mostrar);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  focarBuscaPorAtalho(evento: KeyboardEvent) {
+    const atalhoBusca = evento.key.toLowerCase() === 'k' && (this.ehMac ? evento.metaKey : evento.ctrlKey);
+    if (!atalhoBusca || this.emRotaDetalhe()) return;
+    evento.preventDefault();
+    this.entradaBusca?.nativeElement.focus();
+    this.entradaBusca?.nativeElement.select();
   }
 
   voltarAoTopo() {
@@ -158,16 +158,6 @@ export class AppComponent implements OnInit {
       this.diretores.set(new Set());
       this.decadas.set(new Set());
     });
-  }
-
-  executarAcao(id: string) {
-    const acoes: Record<string, () => void> = {
-      famosos: () => this.aplicar(() => this.ordem.set('famosos')),
-      recentes: () => this.aplicar(() => { this.ordem.set('lancamento'); this.direcao.set('desc'); }),
-      antigos: () => this.aplicar(() => { this.ordem.set('lancamento'); this.direcao.set('asc'); }),
-      limpar: () => this.limparFiltros(),
-    };
-    acoes[id]?.();
   }
 
   irParaFilme(filme: Movie) {

@@ -37,7 +37,8 @@
     </div>
 
     <div class="caption">
-      <h3 class="title" [title]="movie.title">{{ movie.title }}</h3>
+      @let trecho = trechoTitulo();
+      <h3 class="title" [title]="movie.title">{{ trecho.antes }}<mark [hidden]="!trecho.destaque">{{ trecho.destaque }}</mark>{{ trecho.depois }}</h3>
       <p class="year-score">
         <span>{{ movie.release_date }}</span>
         <span class="score" [attr.aria-label]="'Nota ' + movie.rt_score + ' de 100'">{{ movie.rt_score }}%</span>

@@ -7,13 +7,18 @@
         <p class="subtitle" aria-live="polite">{{ textoContagem() }}</p>
       }
     </div>
-    <app-busca-rapida
-      [filmes]="filmes()"
-      [acoes]="acoesRapidas()"
-      [ativa]="!emRotaDetalhe()"
-      (escolherFilme)="irParaFilme($event)"
-      (escolherAcao)="executarAcao($event)">
-    </app-busca-rapida>
+    <label class="search-field">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input
+        #entradaBusca
+        type="search"
+        [value]="busca()"
+        placeholder="Buscar filme ou diretor"
+        aria-label="Buscar filme por nome"
+        autocomplete="off"
+        (input)="aoDigitarBusca(entradaBusca.value)">
+      <kbd>{{ ehMac ? '⌘ K' : 'Ctrl K' }}</kbd>
+    </label>
   </header>
 
   @if (estado() === 'pronto' && filmes().length) {
@@ -38,18 +43,6 @@
 
     <div class="filter-bar">
       <div class="filters" role="group" aria-label="Filtrar">
-        <div class="filter-group name-filter">
-          <label class="group-label" for="filtro-nome">Nome</label>
-          <input
-            id="filtro-nome"
-            #entradaBusca
-            type="search"
-            [value]="busca()"
-            placeholder="Buscar por nome"
-            aria-label="Buscar filme por nome"
-            autocomplete="off"
-            (input)="aoDigitarBusca(entradaBusca.value)">
-        </div>
         <div class="filter-group">
           <span class="group-label">Diretor</span>
           <div class="chip-row">
@@ -111,7 +104,7 @@
               [class.entering]="primeiraRenderizacao()"
               [style.--i]="indice"
               [style.view-transition-name]="'filme-' + movie.id">
-              <app-card-movie [movie]="movie" (abrir)="abrirFilme($event)"></app-card-movie>
+              <app-card-movie [movie]="movie" [termoBusca]="busca()" (abrir)="abrirFilme($event)"></app-card-movie>
             </li>
           }
         </ul>

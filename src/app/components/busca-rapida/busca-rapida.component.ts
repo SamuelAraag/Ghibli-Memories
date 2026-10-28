@@ -32,8 +32,10 @@ export class BuscaRapidaComponent {
   @Input() filmes: Movie[] = [];
   @Input() acoes: AcaoRapida[] = [];
   @Input() ativa = true;
+  @Input() buscaInicial = '';
   @Output() escolherFilme = new EventEmitter<Movie>();
   @Output() escolherAcao = new EventEmitter<string>();
+  @Output() buscaAlterada = new EventEmitter<string>();
 
   @ViewChild('dialogo') dialogo!: ElementRef<HTMLDialogElement>;
   @ViewChild('entrada') entrada!: ElementRef<HTMLInputElement>;
@@ -67,11 +69,11 @@ export class BuscaRapidaComponent {
 
   abrir() {
     if (this.aberto()) return;
-    this.termo.set('');
+    this.termo.set(this.buscaInicial);
     this.atualizarResultados();
     this.dialogo.nativeElement.showModal();
     this.corpo.nativeElement.scrollTop = 0;
-    this.entrada.nativeElement.value = '';
+    this.entrada.nativeElement.value = this.buscaInicial;
     this.entrada.nativeElement.focus();
   }
 
@@ -84,6 +86,7 @@ export class BuscaRapidaComponent {
     this.espera = setTimeout(() => {
       this.termo.set(valor.trim());
       this.atualizarResultados();
+      this.buscaAlterada.emit(valor.trim());
     }, 80);
   }
 
@@ -91,6 +94,7 @@ export class BuscaRapidaComponent {
     this.entrada.nativeElement.value = '';
     this.termo.set('');
     this.atualizarResultados();
+    this.buscaAlterada.emit('');
     this.entrada.nativeElement.focus();
   }
 
