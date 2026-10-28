@@ -1,12 +1,12 @@
-import { Component, OnInit, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef, ViewChildren, QueryList, HostListener, ElementRef, ViewChild, DestroyRef, inject } from '@angular/core';
+import { AfterViewInit, Component, OnInit, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef, ViewChildren, QueryList, HostListener, ElementRef, ViewChild, DestroyRef, inject } from '@angular/core';
 import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { Movie } from './models/movie.model';
 import { CardMovieComponent } from "./components/card-movie/card-movie.component";
-import { BuscaRapidaComponent, AcaoRapida } from './components/busca-rapida/busca-rapida.component';
 import { posicaoPopularidade } from './data/popularidade';
+import { normalizarTexto } from './util/texto';
 import { FilmesService } from './services/filmes.service';
 import { CAMINHO_FILME, ehRotaFilme } from './app.routes';
 
@@ -18,22 +18,25 @@ const OUTROS_DIRETORES = 'Outros';
 
 @Component({
     selector: 'app-root',
-    imports: [CardMovieComponent, BuscaRapidaComponent, RouterOutlet],
+    imports: [CardMovieComponent, RouterOutlet],
     templateUrl: './app.component.html',
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './app.component.scss'
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
   title = 'ghibli-memories';
+  ehMac = /Mac|iPhone|iPad/.test(navigator.userAgent);
 
   @ViewChildren(CardMovieComponent) cards!: QueryList<CardMovieComponent>;
   @ViewChild('titulo') titulo!: ElementRef<HTMLElement>;
+  @ViewChild('entradaBusca') entradaBusca!: ElementRef<HTMLInputElement>;
 
   filmes = this.filmesService.filmes;
   estado = this.filmesService.estado;
   emRotaDetalhe = signal(ehRotaFilme(inject(Location).path()));
   ordem = signal<Ordem>('famosos');
   direcao = signal<Direcao>('desc');
+  busca = signal('');
   diretores = signal<Set<string>>(new Set());
   decadas = signal<Set<string>>(new Set());
   primeiraRenderizacao = signal(true);
@@ -43,12 +46,15 @@ export class AppComponent implements OnInit {
   opcoesDiretor = [...DIRETORES_PRINCIPAIS, OUTROS_DIRETORES];
   opcoesDecada = ['1980', '1990', '2000', '2010', '2020'];
 
-  temFiltro = computed(() => this.diretores().size > 0 || this.decadas().size > 0);
+  temFiltro = computed(() => !!this.busca() || this.diretores().size > 0 || this.decadas().size > 0);
 
   filmesVisiveis = computed(() => {
+    const busca = normalizarTexto(this.busca());
     const diretores = this.diretores();
     const decadas = this.decadas();
     const lista = this.filmes().filter((filme) =>
+      (!busca || [filme.title, filme.original_title, filme.original_title_romanised]
+        .some((campo) => normalizarTexto(campo ?? '').includes(busca))) &&
       (!diretores.size || diretores.has(this.diretorDoFiltro(filme))) &&
       (!decadas.size || decadas.has(this.decadaDe(filme)))
     );
@@ -62,18 +68,9 @@ export class AppComponent implements OnInit {
     return visiveis === total ? base : `${base} de ${total}`;
   });
 
-  acoesRapidas = computed<AcaoRapida[]>(() => {
-    const acoes: AcaoRapida[] = [
-      { id: 'famosos', rotulo: 'Ordenar por mais famosos', icone: '★' },
-      { id: 'recentes', rotulo: 'Ordenar por lançamento, mais recentes', icone: '↓' },
-      { id: 'antigos', rotulo: 'Ordenar por lançamento, mais antigos', icone: '↑' },
-    ];
-    if (this.temFiltro()) acoes.push({ id: 'limpar', rotulo: 'Limpar filtros', icone: '✕' });
-    return acoes;
-  });
-
   private rolagemLista = 0;
   private idUltimoFilme = '';
+  private esperaBusca?: ReturnType<typeof setTimeout>;
 
   constructor(
     private filmesService: FilmesService,
@@ -88,6 +85,10 @@ export class AppComponent implements OnInit {
     this.router.events
       .pipe(filter((evento) => evento instanceof NavigationEnd), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.sincronizarComUrl());
+  }
+
+  ngAfterViewInit() {
+    this.entradaBusca.nativeElement.value = this.busca();
   }
 
   carregarFilmes() {
@@ -107,6 +108,17 @@ export class AppComponent implements OnInit {
     if (this.emRotaDetalhe()) return;
     const mostrar = window.scrollY > window.innerHeight * 0.8;
     if (mostrar !== this.mostrarVoltarAoTopo()) this.mostrarVoltarAoTopo.set(mostrar);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  focarBuscaPorAtalho(evento: KeyboardEvent) {
+    const alvo = evento.target as HTMLElement;
+    const atalhoK = evento.key.toLowerCase() === 'k' && (this.ehMac ? evento.metaKey : evento.ctrlKey);
+    const barra = evento.key === '/' && !['INPUT', 'TEXTAREA'].includes(alvo.tagName);
+    if ((!atalhoK && !barra) || this.emRotaDetalhe()) return;
+    evento.preventDefault();
+    this.entradaBusca?.nativeElement.focus();
+    this.entradaBusca?.nativeElement.select();
   }
 
   voltarAoTopo() {
@@ -136,25 +148,24 @@ export class AppComponent implements OnInit {
     this.aplicar(() => this.diretores.update((atual) => this.alternarItem(atual, diretor)));
   }
 
+  aoDigitarBusca(valor: string) {
+    clearTimeout(this.esperaBusca);
+    this.esperaBusca = setTimeout(() => {
+      this.aplicar(() => this.busca.set(valor.trim()));
+    }, 120);
+  }
+
   alternarDecada(decada: string) {
     this.aplicar(() => this.decadas.update((atual) => this.alternarItem(atual, decada)));
   }
 
   limparFiltros() {
     this.aplicar(() => {
+      this.busca.set('');
+      if (this.entradaBusca) this.entradaBusca.nativeElement.value = '';
       this.diretores.set(new Set());
       this.decadas.set(new Set());
     });
-  }
-
-  executarAcao(id: string) {
-    const acoes: Record<string, () => void> = {
-      famosos: () => this.aplicar(() => this.ordem.set('famosos')),
-      recentes: () => this.aplicar(() => { this.ordem.set('lancamento'); this.direcao.set('desc'); }),
-      antigos: () => this.aplicar(() => { this.ordem.set('lancamento'); this.direcao.set('asc'); }),
-      limpar: () => this.limparFiltros(),
-    };
-    acoes[id]?.();
   }
 
   irParaFilme(filme: Movie) {
@@ -229,6 +240,7 @@ export class AppComponent implements OnInit {
 
   private lerUrl() {
     const parametros = new URLSearchParams(window.location.search);
+    this.busca.set(parametros.get('busca')?.trim() ?? '');
     const ordem = parametros.get('ordem');
     if (ordem === 'lancamento' || ordem === 'nota') this.ordem.set(ordem);
     if (parametros.get('direcao') === 'asc') this.direcao.set('asc');
@@ -240,6 +252,7 @@ export class AppComponent implements OnInit {
 
   private gravarUrl() {
     const parametros = new URLSearchParams();
+    if (this.busca()) parametros.set('busca', this.busca());
     if (this.ordem() !== 'famosos') parametros.set('ordem', this.ordem());
     if (this.ordem() === 'lancamento') parametros.set('direcao', this.direcao());
     this.diretores().forEach((d) => parametros.append('diretor', d));
@@ -247,4 +260,5 @@ export class AppComponent implements OnInit {
     const busca = parametros.toString();
     history.replaceState(history.state, '', busca ? `?${busca}` : window.location.pathname);
   }
+
 }

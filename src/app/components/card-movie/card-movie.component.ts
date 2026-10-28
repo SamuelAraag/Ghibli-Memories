@@ -1,5 +1,6 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, Output, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Movie } from '../../models/movie.model';
+import { normalizarTexto } from '../../util/texto';
 
 @Component({
     selector: 'app-card-movie',
@@ -11,9 +12,21 @@ import { Movie } from '../../models/movie.model';
 
 export class CardMovieComponent {
   @Input() movie?: Movie;
+  @Input() termoBusca = '';
   @Output() abrir = new EventEmitter<Movie>();
 
   ativo = false;
+
+  trechoTitulo(): { antes: string; destaque: string; depois: string } {
+    const titulo = this.movie?.title ?? '';
+    const termo = normalizarTexto(this.termoBusca);
+    if (!termo) return { antes: titulo, destaque: '', depois: '' };
+    const indice = normalizarTexto(titulo).indexOf(termo);
+    if (indice < 0) return { antes: titulo, destaque: '', depois: '' };
+    const tamanho = this.termoBusca.trim().length;
+    return { antes: titulo.slice(0, indice), destaque: titulo.slice(indice, indice + tamanho), depois: titulo.slice(indice + tamanho) };
+  }
+
 
   constructor(private elemento: ElementRef<HTMLElement>, private detector: ChangeDetectorRef) {}
 

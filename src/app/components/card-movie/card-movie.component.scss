@@ -111,6 +111,12 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     transition: color var(--dur-out) var(--ease-soft);
+
+    mark {
+        border-radius: 2px;
+        background: color-mix(in srgb, var(--accent) 35%, transparent);
+        color: inherit;
+    }
 }
 
 .year-score {
