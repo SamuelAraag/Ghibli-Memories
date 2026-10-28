@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import { Movie } from '../models/movie.model';
+import { RANKING_POPULARIDADE } from '../data/popularidade';
 
 export type EstadoCarregamento = 'carregando' | 'pronto' | 'erro';
 
@@ -26,6 +27,7 @@ export class FilmesService {
         this.emAndamento = false;
         this.filmes.set(filmes);
         this.estado.set('pronto');
+        this.preCarregarCapas(filmes);
       },
       error: () => {
         this.emAndamento = false;
@@ -37,6 +39,33 @@ export class FilmesService {
   carregarSeNecessario() {
     if (this.estado() === 'pronto' && this.filmes().length) return;
     this.carregar();
+  }
+
+  private preCarregarCapas(filmes: Movie[]) {
+    const posicao = (filme: Movie) => {
+      const indice = RANKING_POPULARIDADE.indexOf(filme.id);
+      return indice === -1 ? Infinity : indice;
+    };
+    const fila = [...filmes]
+      .sort((a, b) => posicao(a) - posicao(b))
+      .map((filme) => filme.movie_banner)
+      .filter(Boolean);
+
+    const quandoOcioso = (acao: () => void) => {
+      if ('requestIdleCallback' in window) requestIdleCallback(acao);
+      else setTimeout(acao, 200);
+    };
+
+    const proxima = () => {
+      const url = fila.shift();
+      if (!url) return;
+      const imagem = new Image();
+      imagem.fetchPriority = 'low';
+      imagem.onload = imagem.onerror = () => quandoOcioso(proxima);
+      imagem.src = url;
+    };
+
+    quandoOcioso(proxima);
   }
 
   buscar(id: string): Movie | undefined {

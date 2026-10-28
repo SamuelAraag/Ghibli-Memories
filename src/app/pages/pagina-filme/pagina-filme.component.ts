@@ -29,7 +29,7 @@ export class PaginaFilmeComponent {
     private injector: Injector
   ) {
     this.filmesService.carregarSeNecessario();
-    window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: 'instant' });
     effect(() => {
       this.idAtual();
       if (!this.pronto()) return;
