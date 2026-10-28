@@ -8,11 +8,10 @@ import { CardMovieComponent } from "./components/card-movie/card-movie.component
 type EstadoCarregamento = 'carregando' | 'pronto' | 'erro';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, CardMovieComponent],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+    selector: 'app-root',
+    imports: [RouterOutlet, CardMovieComponent],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
   title = 'ghibli-memories';
