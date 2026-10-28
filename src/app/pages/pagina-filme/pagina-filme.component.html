@@ -14,7 +14,7 @@
     }
     @case ('erro') {
       <section class="feedback" role="alert">
-        <h1>Não foi possível carregar o filme</h1>
+        <h1 tabindex="-1">Não foi possível carregar o filme</h1>
         <p>A API do Studio Ghibli não respondeu. Confira a conexão e tente de novo.</p>
         <button type="button" class="btn-outline" (click)="filmesService.carregar()">Tentar de novo</button>
       </section>
@@ -24,7 +24,7 @@
         <app-detalhe-filme [filme]="filme"></app-detalhe-filme>
       } @else {
         <section class="feedback">
-          <h1>Filme não encontrado</h1>
+          <h1 tabindex="-1">Filme não encontrado</h1>
           <p>O link pode estar incompleto ou o filme saiu da API.</p>
           <button type="button" class="btn-outline" (click)="voltar()">Ver todos os filmes</button>
         </section>

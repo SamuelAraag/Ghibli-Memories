@@ -1,10 +1,8 @@
 import { ApplicationConfig } from '@angular/core';
-import { ActivatedRouteSnapshot, provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 
-import { routes } from './app.routes';
-
-const ehPaginaFilme = (rota: ActivatedRouteSnapshot) => rota.firstChild?.routeConfig?.path === 'filme/:id';
+import { ehRotaFilme, routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,6 +12,7 @@ export const appConfig: ApplicationConfig = {
       withViewTransitions({
         skipInitialTransition: true,
         onViewTransitionCreated: ({ transition, from, to }) => {
+          const ehPaginaFilme = (rota: typeof from) => ehRotaFilme('/' + rota.firstChild?.url.map((s) => s.path).join('/'));
           const reduzirMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
           if (reduzirMovimento || ehPaginaFilme(from) === ehPaginaFilme(to)) transition.skipTransition();
         }

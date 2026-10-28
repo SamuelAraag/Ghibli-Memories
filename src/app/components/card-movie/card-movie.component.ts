@@ -45,6 +45,10 @@ export class CardMovieComponent {
     if (botao.matches(':focus-visible')) this.ativo = true;
   }
 
+  focar() {
+    this.elemento.nativeElement.querySelector<HTMLElement>('.card-action')?.focus({ preventScroll: true });
+  }
+
   destacar() {
     const host = this.elemento.nativeElement;
     const poster = host.querySelector<HTMLElement>('.poster');

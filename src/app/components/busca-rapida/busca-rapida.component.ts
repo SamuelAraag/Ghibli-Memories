@@ -31,6 +31,7 @@ interface TrechoDestacado {
 export class BuscaRapidaComponent {
   @Input() filmes: Movie[] = [];
   @Input() acoes: AcaoRapida[] = [];
+  @Input() ativa = true;
   @Output() escolherFilme = new EventEmitter<Movie>();
   @Output() escolherAcao = new EventEmitter<string>();
 
@@ -51,6 +52,7 @@ export class BuscaRapidaComponent {
 
   @HostListener('document:keydown', ['$event'])
   aoTeclar(evento: KeyboardEvent) {
+    if (!this.ativa) return;
     const alvo = evento.target as HTMLElement;
     const atalhoK = evento.key.toLowerCase() === 'k' && (this.ehMac ? evento.metaKey : evento.ctrlKey);
     const barra = evento.key === '/' && !this.aberto() && !['INPUT', 'TEXTAREA'].includes(alvo.tagName);

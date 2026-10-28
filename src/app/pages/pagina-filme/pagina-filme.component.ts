@@ -1,4 +1,4 @@
-import { AfterViewChecked, ChangeDetectionStrategy, Component, ElementRef, Input, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Injector, Input, afterNextRender, computed, effect, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 import { FilmesService } from '../../services/filmes.service';
@@ -11,35 +11,37 @@ import { DetalheFilmeComponent } from '../../components/detalhe-filme/detalhe-fi
     changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './pagina-filme.component.scss'
 })
-export class PaginaFilmeComponent implements AfterViewChecked {
+export class PaginaFilmeComponent {
   private idAtual = signal('');
-  private focou = false;
 
   @Input() set id(valor: string) {
     this.idAtual.set(valor);
-    this.focou = false;
   }
 
   filme = computed(() => this.filmesService.buscar(this.idAtual()));
+  pronto = computed(() => this.filmesService.estado() !== 'carregando');
 
   constructor(
     public filmesService: FilmesService,
     private router: Router,
     private location: Location,
-    private elemento: ElementRef<HTMLElement>
+    private elemento: ElementRef<HTMLElement>,
+    private injector: Injector
   ) {
     this.filmesService.carregarSeNecessario();
     window.scrollTo({ top: 0 });
-  }
-
-  ngAfterViewChecked() {
-    if (this.focou || !this.filme()) return;
-    this.elemento.nativeElement.querySelector<HTMLElement>('.titulo')?.focus({ preventScroll: true });
-    this.focou = true;
+    effect(() => {
+      this.idAtual();
+      if (!this.pronto()) return;
+      afterNextRender(() => {
+        this.elemento.nativeElement.querySelector<HTMLElement>('h1')?.focus({ preventScroll: true });
+      }, { injector: this.injector });
+    });
   }
 
   voltar() {
-    if (this.router.lastSuccessfulNavigation()?.previousNavigation) {
+    if (this.filmesService.veioDaLista) {
+      this.filmesService.veioDaLista = false;
       this.location.back();
       return;
     }

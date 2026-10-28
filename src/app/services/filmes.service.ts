@@ -15,7 +15,10 @@ export class FilmesService {
 
   private emAndamento = false;
 
+  veioDaLista = false;
+
   carregar() {
+    if (this.emAndamento) return;
     this.emAndamento = true;
     this.estado.set('carregando');
     this.http.get<Movie[]>(this.urlApiGhibli).subscribe({
@@ -32,7 +35,7 @@ export class FilmesService {
   }
 
   carregarSeNecessario() {
-    if (this.emAndamento || (this.estado() === 'pronto' && this.filmes().length)) return;
+    if (this.estado() === 'pronto' && this.filmes().length) return;
     this.carregar();
   }
 

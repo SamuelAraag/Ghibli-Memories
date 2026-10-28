@@ -10,6 +10,7 @@
     <app-busca-rapida
       [filmes]="filmes()"
       [acoes]="acoesRapidas()"
+      [ativa]="!emRotaDetalhe()"
       (escolherFilme)="irParaFilme($event)"
       (escolherAcao)="executarAcao($event)">
     </app-busca-rapida>

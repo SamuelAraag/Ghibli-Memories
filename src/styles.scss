@@ -81,11 +81,16 @@ body {
 }
 
 .feedback {
+    h1:focus {
+        outline: none;
+    }
+
     max-width: 420px;
     margin: 48px auto;
     text-align: center;
     animation: card-enter var(--dur-in) var(--ease-smooth) both;
 
+    h1,
     h2 {
         font-size: 1.25rem;
         margin-bottom: 8px;

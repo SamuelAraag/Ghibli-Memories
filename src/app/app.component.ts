@@ -1,4 +1,5 @@
-import { Component, OnInit, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef, ViewChildren, QueryList, HostListener, ElementRef, ViewChild, DestroyRef } from '@angular/core';
+import { Component, OnInit, signal, computed, ChangeDetectionStrategy, ChangeDetectorRef, ViewChildren, QueryList, HostListener, ElementRef, ViewChild, DestroyRef, inject } from '@angular/core';
+import { Location } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
@@ -7,6 +8,7 @@ import { CardMovieComponent } from "./components/card-movie/card-movie.component
 import { BuscaRapidaComponent, AcaoRapida } from './components/busca-rapida/busca-rapida.component';
 import { posicaoPopularidade } from './data/popularidade';
 import { FilmesService } from './services/filmes.service';
+import { CAMINHO_FILME, ehRotaFilme } from './app.routes';
 
 type Ordem = 'famosos' | 'lancamento' | 'nota';
 type Direcao = 'desc' | 'asc';
@@ -29,7 +31,7 @@ export class AppComponent implements OnInit {
 
   filmes = this.filmesService.filmes;
   estado = this.filmesService.estado;
-  emRotaDetalhe = signal(false);
+  emRotaDetalhe = signal(ehRotaFilme(inject(Location).path()));
   ordem = signal<Ordem>('famosos');
   direcao = signal<Direcao>('desc');
   diretores = signal<Set<string>>(new Set());
@@ -71,6 +73,7 @@ export class AppComponent implements OnInit {
   });
 
   private rolagemLista = 0;
+  private idUltimoFilme = '';
 
   constructor(
     private filmesService: FilmesService,
@@ -94,7 +97,9 @@ export class AppComponent implements OnInit {
   abrirFilme(filme: Movie) {
     this.cards?.forEach((card) => card.desativar());
     this.rolagemLista = window.scrollY;
-    this.router.navigate(['filme', filme.id]);
+    this.idUltimoFilme = filme.id;
+    this.filmesService.veioDaLista = true;
+    this.router.navigate([CAMINHO_FILME, filme.id]);
   }
 
   @HostListener('window:scroll')
@@ -209,12 +214,17 @@ export class AppComponent implements OnInit {
 
   private sincronizarComUrl() {
     const estavaNoDetalhe = this.emRotaDetalhe();
-    const noDetalhe = this.router.url.startsWith('/filme/');
+    const noDetalhe = ehRotaFilme(this.router.url);
     this.emRotaDetalhe.set(noDetalhe);
     if (estavaNoDetalhe && !noDetalhe) {
       this.detector.detectChanges();
       window.scrollTo({ top: this.rolagemLista });
+      this.focarCardDoUltimoFilme();
     }
+  }
+
+  private focarCardDoUltimoFilme() {
+    this.cards?.find((card) => card.movie?.id === this.idUltimoFilme)?.focar();
   }
 
   private lerUrl() {
