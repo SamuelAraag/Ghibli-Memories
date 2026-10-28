@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnInit, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { map } from 'rxjs';
 import { Movie } from './models/movie.model';
 import { CardMovieComponent } from "./components/card-movie/card-movie.component";
@@ -9,8 +8,9 @@ type EstadoCarregamento = 'carregando' | 'pronto' | 'erro';
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet, CardMovieComponent],
+    imports: [CardMovieComponent],
     templateUrl: './app.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
