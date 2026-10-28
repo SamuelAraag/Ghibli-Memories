@@ -34,6 +34,7 @@ export class AppComponent implements OnInit {
   emRotaDetalhe = signal(ehRotaFilme(inject(Location).path()));
   ordem = signal<Ordem>('famosos');
   direcao = signal<Direcao>('desc');
+  busca = signal('');
   diretores = signal<Set<string>>(new Set());
   decadas = signal<Set<string>>(new Set());
   primeiraRenderizacao = signal(true);
@@ -43,12 +44,15 @@ export class AppComponent implements OnInit {
   opcoesDiretor = [...DIRETORES_PRINCIPAIS, OUTROS_DIRETORES];
   opcoesDecada = ['1980', '1990', '2000', '2010', '2020'];
 
-  temFiltro = computed(() => this.diretores().size > 0 || this.decadas().size > 0);
+  temFiltro = computed(() => !!this.busca() || this.diretores().size > 0 || this.decadas().size > 0);
 
   filmesVisiveis = computed(() => {
+    const busca = this.normalizar(this.busca());
     const diretores = this.diretores();
     const decadas = this.decadas();
     const lista = this.filmes().filter((filme) =>
+      (!busca || [filme.title, filme.original_title, filme.original_title_romanised]
+        .some((campo) => this.normalizar(campo ?? '').includes(busca))) &&
       (!diretores.size || diretores.has(this.diretorDoFiltro(filme))) &&
       (!decadas.size || decadas.has(this.decadaDe(filme)))
     );
@@ -74,6 +78,7 @@ export class AppComponent implements OnInit {
 
   private rolagemLista = 0;
   private idUltimoFilme = '';
+  private esperaBusca?: ReturnType<typeof setTimeout>;
 
   constructor(
     private filmesService: FilmesService,
@@ -136,12 +141,20 @@ export class AppComponent implements OnInit {
     this.aplicar(() => this.diretores.update((atual) => this.alternarItem(atual, diretor)));
   }
 
+  aoDigitarBusca(valor: string) {
+    clearTimeout(this.esperaBusca);
+    this.esperaBusca = setTimeout(() => {
+      this.aplicar(() => this.busca.set(valor.trim()));
+    }, 120);
+  }
+
   alternarDecada(decada: string) {
     this.aplicar(() => this.decadas.update((atual) => this.alternarItem(atual, decada)));
   }
 
   limparFiltros() {
     this.aplicar(() => {
+      this.busca.set('');
       this.diretores.set(new Set());
       this.decadas.set(new Set());
     });
@@ -229,6 +242,7 @@ export class AppComponent implements OnInit {
 
   private lerUrl() {
     const parametros = new URLSearchParams(window.location.search);
+    this.busca.set(parametros.get('busca')?.trim() ?? '');
     const ordem = parametros.get('ordem');
     if (ordem === 'lancamento' || ordem === 'nota') this.ordem.set(ordem);
     if (parametros.get('direcao') === 'asc') this.direcao.set('asc');
@@ -240,11 +254,16 @@ export class AppComponent implements OnInit {
 
   private gravarUrl() {
     const parametros = new URLSearchParams();
+    if (this.busca()) parametros.set('busca', this.busca());
     if (this.ordem() !== 'famosos') parametros.set('ordem', this.ordem());
     if (this.ordem() === 'lancamento') parametros.set('direcao', this.direcao());
     this.diretores().forEach((d) => parametros.append('diretor', d));
     this.decadas().forEach((d) => parametros.append('decada', d));
     const busca = parametros.toString();
     history.replaceState(history.state, '', busca ? `?${busca}` : window.location.pathname);
+  }
+
+  private normalizar(texto: string): string {
+    return texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   }
 }

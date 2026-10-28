@@ -38,6 +38,18 @@
 
     <div class="filter-bar">
       <div class="filters" role="group" aria-label="Filtrar">
+        <div class="filter-group name-filter">
+          <label class="group-label" for="filtro-nome">Nome</label>
+          <input
+            id="filtro-nome"
+            #entradaBusca
+            type="search"
+            [value]="busca()"
+            placeholder="Buscar por nome"
+            aria-label="Buscar filme por nome"
+            autocomplete="off"
+            (input)="aoDigitarBusca(entradaBusca.value)">
+        </div>
         <div class="filter-group">
           <span class="group-label">Diretor</span>
           <div class="chip-row">
@@ -88,7 +100,7 @@
       } @else if (!filmesVisiveis().length) {
         <section class="feedback">
           <h2>Nenhum filme com esses filtros</h2>
-          <p>Tire um diretor ou uma década para ver mais resultados.</p>
+          <p>Altere a busca ou tire um filtro para ver mais resultados.</p>
           <button type="button" class="btn-outline" (click)="limparFiltros()">Limpar filtros</button>
         </section>
       } @else {
