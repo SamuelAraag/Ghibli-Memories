@@ -1,35 +1,50 @@
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { map, Observable } from 'rxjs';
+import { map } from 'rxjs';
 import { Movie } from './models/movie.model';
-import { CommonModule } from '@angular/common';
 import { CardMovieComponent } from "./components/card-movie/card-movie.component";
+
+type EstadoCarregamento = 'carregando' | 'pronto' | 'erro';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HttpClientModule, CommonModule, CardMovieComponent],
+  imports: [RouterOutlet, CardMovieComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent implements OnInit {
   title = 'ghibli-memories';
 
-  $movies: Observable<Movie[]> = new Observable();
+  filmes = signal<Movie[]>([]);
+  estado = signal<EstadoCarregamento>('carregando');
+  esqueletos = Array.from({ length: 6 }, (_, indice) => indice);
 
   constructor(private http: HttpClient){}
 
   ngOnInit() {
-    const urlApiGhibli = "https://ghibliapi.vercel.app/films";
-    this.$movies = this.http.get<Movie[]>(urlApiGhibli)
-    .pipe(
-      map((movies: Movie[]) => this.sortMoviesByDate(movies))
-    );
+    this.carregarFilmes();
   }
 
-  private sortMoviesByDate(movies: Movie[]): Movie[] {
-    return movies.sort((a, b) => 
+  carregarFilmes() {
+    const urlApiGhibli = "https://ghibliapi.vercel.app/films";
+    this.estado.set('carregando');
+    this.http.get<Movie[]>(urlApiGhibli)
+    .pipe(
+      map((movies: Movie[]) => this.ordenarPorNota(movies))
+    )
+    .subscribe({
+      next: (movies) => {
+        this.filmes.set(movies);
+        this.estado.set('pronto');
+      },
+      error: () => this.estado.set('erro')
+    });
+  }
+
+  private ordenarPorNota(movies: Movie[]): Movie[] {
+    return [...movies].sort((a, b) =>
       Number(b.rt_score) - Number(a.rt_score)
     );
   }

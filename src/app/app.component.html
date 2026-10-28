@@ -1,17 +1,46 @@
 <main class="main">
-  <div class="content">
+  <header class="page-header">
+    <h1>Ghibli Memories</h1>
+    @if (estado() === 'pronto' && filmes().length) {
+      <p class="subtitle">{{ filmes().length }} filmes, mais bem avaliados primeiro</p>
+    }
+  </header>
 
-    <!-- CARD MOVIE -->
-    <div class="container py-4">
-      <div class="row gx-5">
-        <ng-container>
-            @for (movie of ($movies | async); track $index) {
-              <div class="itens col-md-12 col-lg-4 mb-lg-0 pb-5">
-                <app-card-movie [movie]="movie"></app-card-movie>
-              </div>
-            }
-        </ng-container>
-      </div>
-    </div>
-  </div>
+  @switch (estado()) {
+    @case ('carregando') {
+      <ul class="movie-grid" aria-busy="true" aria-label="Carregando filmes">
+        @for (indice of esqueletos; track indice) {
+          <li class="skeleton" aria-hidden="true">
+            <div class="skeleton-poster"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line short"></div>
+          </li>
+        }
+      </ul>
+    }
+    @case ('erro') {
+      <section class="feedback" role="alert">
+        <h2>Não foi possível carregar os filmes</h2>
+        <p>A API do Studio Ghibli não respondeu. Confira a conexão e tente de novo.</p>
+        <button type="button" class="btn-retry" (click)="carregarFilmes()">Tentar de novo</button>
+      </section>
+    }
+    @case ('pronto') {
+      @if (filmes().length) {
+        <ul class="movie-grid">
+          @for (movie of filmes(); track movie.id; let indice = $index) {
+            <li class="movie-item" [style.--i]="indice">
+              <app-card-movie [movie]="movie"></app-card-movie>
+            </li>
+          }
+        </ul>
+      } @else {
+        <section class="feedback">
+          <h2>Nenhum filme encontrado</h2>
+          <p>A API devolveu uma lista vazia.</p>
+          <button type="button" class="btn-retry" (click)="carregarFilmes()">Recarregar</button>
+        </section>
+      }
+    }
+  }
 </main>

@@ -1,0 +1,47 @@
+:root {
+    --bg: #0f1114;
+    --bg-glow: #1d2a33;
+    --surface: #1a1d22;
+    --surface-raised: #23272e;
+    --text: #e8e6e3;
+    --text-strong: #ffffff;
+    --text-muted: #a3a8b0;
+    --accent: #7cc4a4;
+    --overlay: rgba(10, 12, 15, 0.94);
+    --overlay-soft: rgba(10, 12, 15, 0.55);
+    --shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+    --shadow-raised: 0 28px 56px rgba(0, 0, 0, 0.55);
+    --radius: 12px;
+    --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+    --dur-micro: 0.2s;
+    --dur-in: 0.55s;
+    --dur-out: 0.4s;
+}
+
+html {
+    color-scheme: dark;
+}
+
+body {
+    min-height: 100dvh;
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, var(--bg-glow), transparent 70%),
+        var(--bg);
+    background-attachment: fixed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0s !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0s !important;
+    }
+}

@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, ElementRef, HostListener, Input } from '@angular/core';
 import { Movie } from '../../models/movie.model';
 
 @Component({
@@ -11,4 +11,37 @@ import { Movie } from '../../models/movie.model';
 
 export class CardMovieComponent {
   @Input() movie?: Movie;
+
+  ativo = false;
+
+  constructor(private elemento: ElementRef<HTMLElement>) {}
+
+  @HostListener('pointerenter', ['$event'])
+  aoEntrarPonteiro(evento: PointerEvent) {
+    if (evento.pointerType === 'mouse') this.ativo = true;
+  }
+
+  @HostListener('pointerleave', ['$event'])
+  aoSairPonteiro(evento: PointerEvent) {
+    if (evento.pointerType === 'mouse') this.ativo = false;
+  }
+
+  @HostListener('document:keydown.escape')
+  desativar() {
+    this.ativo = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  aoClicarFora(evento: MouseEvent) {
+    if (!this.elemento.nativeElement.contains(evento.target as Node)) this.ativo = false;
+  }
+
+  alternar() {
+    if (window.matchMedia('(hover: hover)').matches) return;
+    this.ativo = !this.ativo;
+  }
+
+  aoFocar(botao: HTMLElement) {
+    if (botao.matches(':focus-visible')) this.ativo = true;
+  }
 }

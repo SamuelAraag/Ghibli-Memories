@@ -1,0 +1,138 @@
+.main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 16px 64px;
+}
+
+.page-header {
+    margin-bottom: 32px;
+
+    h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+        margin: 4px 0 0;
+        color: var(--text-muted);
+    }
+}
+
+.movie-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 32px 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.movie-item {
+    animation: card-enter 0.7s var(--ease-smooth) both;
+    animation-delay: calc(min(var(--i), 12) * 70ms);
+}
+
+@keyframes card-enter {
+    from {
+        opacity: 0;
+        transform: translateY(24px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.skeleton-poster,
+.skeleton-line {
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, var(--surface) 0%, var(--surface-raised) 50%, var(--surface) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+}
+
+.skeleton-poster {
+    aspect-ratio: 2 / 3;
+}
+
+.skeleton-line {
+    height: 14px;
+    margin-top: 12px;
+    border-radius: 4px;
+
+    &.short {
+        width: 50%;
+        margin-top: 8px;
+    }
+}
+
+@keyframes shimmer {
+    from {
+        background-position: 100% 0;
+    }
+    to {
+        background-position: -100% 0;
+    }
+}
+
+.feedback {
+    max-width: 420px;
+    margin: 64px auto;
+    text-align: center;
+    animation: card-enter var(--dur-in) var(--ease-smooth) both;
+
+    h2 {
+        font-size: 1.25rem;
+        margin-bottom: 8px;
+    }
+
+    p {
+        color: var(--text-muted);
+    }
+}
+
+.btn-retry {
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--accent);
+    font-weight: 600;
+    transition: background-color var(--dur-micro) ease, color var(--dur-micro) ease;
+
+    &:hover {
+        background: var(--accent);
+        color: var(--bg);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+    }
+}
+
+@media (max-width: 599px) {
+    .main {
+        padding: 40px 28px 72px;
+    }
+
+    .page-header {
+        margin-bottom: 36px;
+    }
+
+    .movie-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        max-width: 420px;
+        margin-inline: auto;
+    }
+}
+
+@media (min-width: 768px) {
+    .movie-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}

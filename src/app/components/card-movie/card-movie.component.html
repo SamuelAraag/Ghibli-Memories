@@ -1,29 +1,48 @@
-<div class="card-video">
-    <div class="card-content">
-      <div class="zoom-container ">
-        <img src="{{movie?.image}}" alt="poster">
-      </div>
-      <div class="movie-info">
-        <h4 [title]="movie?.title" class="title text-truncate w-100">
-          {{movie?.title?.toUpperCase()}}
-        </h4>
-        <div class="d-flex">
-          <p class="mt-0 mb-2 me-2">{{movie?.original_title}}</p>
-          <p class="mt-0 mb-2"> - </p>
-          <p class="mt-0 mb-2 ms-2">{{movie?.original_title_romanised}}</p>
-        </div>
-        <div class="ano-tempo-genero d-flex">
-          <p class="me-1 mt-0">{{movie?.release_date}} &bull;</p>
-          <p class="me-1 mt-0">{{movie?.running_time}}min &bull;</p>
-          <p class="me-1 mt-0">Animation &bull;</p>
-          <p class="me-1 mt-0">{{movie?.rt_score}}/100</p>
-        </div>
-        <div class="descricao multiline-truncate">
-          <p [title]="movie?.description">
-            {{movie?.description}}
+@if (movie) {
+  <article class="card-movie" [class.active]="ativo">
+    <div class="poster">
+      <img
+        [src]="movie.image"
+        [alt]="'Pôster de ' + movie.title"
+        width="400"
+        height="600"
+        loading="lazy"
+        decoding="async">
+
+      <div class="shade"></div>
+
+      <div class="info" [id]="'info-' + movie.id">
+        @if (movie.original_title) {
+          <p class="original-title" lang="ja">
+            {{ movie.original_title }}
+            @if (movie.original_title_romanised) {
+              <span class="romanised" lang="ja-Latn">{{ movie.original_title_romanised }}</span>
+            }
           </p>
-        </div>
-        <div class="botao-interacao"></div>
+        }
+        <p class="meta">{{ movie.running_time }} min &bull; {{ movie.director }}</p>
+        <p class="description">{{ movie.description }}</p>
       </div>
+
+      <button
+        #botao
+        type="button"
+        class="card-action"
+        [attr.aria-expanded]="ativo"
+        [attr.aria-controls]="'info-' + movie.id"
+        [attr.aria-label]="'Ver detalhes de ' + movie.title"
+        (click)="alternar()"
+        (focus)="aoFocar(botao)"
+        (blur)="desativar()">
+      </button>
     </div>
-</div>
+
+    <div class="caption">
+      <h3 class="title" [title]="movie.title">{{ movie.title }}</h3>
+      <p class="year-score">
+        <span>{{ movie.release_date }}</span>
+        <span class="score" [attr.aria-label]="'Nota ' + movie.rt_score + ' de 100'">{{ movie.rt_score }}%</span>
+      </p>
+    </div>
+  </article>
+}
